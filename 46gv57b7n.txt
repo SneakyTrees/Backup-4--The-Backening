@@ -1,0 +1,27 @@
+       } else {
+            greatestX = cornerPointTwo.getX();
+            leastX = cornerPointOne.getX();
+        }
+
+        if (cornerPointOne.getY() > cornerPointTwo.getY()) {
+            greatestY = cornerPointOne.getY();
+            leastY = cornerPointTwo.getY();
+        } else {
+            greatestY = cornerPointTwo.getY();
+            leastY = cornerPointOne.getY();
+        }
+
+        //If I don't do this, there will be additional, useless space in the arrays I don't need to deal with
+        Coordinates[] validPointsOverhanging = new Coordinates[testPoints.length];
+        Coordinates[] validPointsCleaned;
+        int currentValidPointsPos = 0;
+        for (int i = 0; i < testPoints.length; i++) {
+            if (!(testPoints[i].getX() >= leastX
+                    && testPoints[i].getX() <= greatestX
+                    &&  testPoints[i].getY() >= leastY
+                    &&  testPoints[i].getY() <= greatestY)
+            ){
+                validPointsOverhanging[currentValidPointsPos] = testPoints[i];
+                currentValidPointsPos++;
+            }
+        }

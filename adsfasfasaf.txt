@@ -1,0 +1,27 @@
+if(points[i] is in perf box)
+	remove point
+	i--
+
+convert arraylist
+
+return array of points with all those inside the perf box removed from it
+
+
+currentValidPOints
+currentTestingPoints = removePointsInPerfBox;
+if(currentTestingPoints.length == 0)
+	return currentTestingPoints
+
+inc hypotenuse and inner
+cnotinue
+
+whe ndone with perfect boxes, return currentValidPoints array
+
+Add a mutual anyPointsAreInBox check as first of checks
+
+if(
+anyPointsAreInBox(<points from comparing>)
+anyPointsAreInBox(<corners from this>)
+)
+
+	return true;

@@ -1,0 +1,9 @@
+BAFTA awards talkin about Dragon Age Origins prepearing for the war wiwth your soldiers, thought it would be way more interesting and realistic toa ctually do armies with supply n stuff
+
+Player is allotted a limited number of resources and charged with maintaing the supply of the current armies in the field at a reasonable level. Player is expected to adapt to the changing situation as the war progresses and resource availability shifts. Player will have to make real choices about which supply/army/routes/etc. to use. Transportation comes in many forms, but is limited and change by things like fuel, weather, and time of year/day. Player receives information (can be correct or incorrect, the player can assess the situation themselves and decide if they want) from the army in the field
+
+Logistics
+-Types of storage/processing nodes to command
+	-Raw resource producers (ex. mines, farms, etc.)
+	-Factories (ex. ammunition manufacturing, weapons, etc.)
+	

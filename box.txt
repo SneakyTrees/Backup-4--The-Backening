@@ -230,10 +230,12 @@ class Box {
     }
 
     public Coordinates[] lineIntersectsPerfectBoxAtCoordinates(Coordinates startPoint, Coordinates endPoint) {
-        if (this.getIsPerfectBox()) {
+        if (!this.getIsPerfectBox()) {
             System.out.println("lineIntersectsPerfectBoxAtCoordinates called on non-perfect box");
+            Coordinates[] c = {null, null};
+            return c;
         }
-
+        
         Coordinates[] intersectionPoints = new Coordinates[2];
         Coordinates[] perfectBoxPairs = {this.getSW(), this.getNW(), this.getSE(), this.getNE(), this.getSW(), this.getSE(), this.getNW(), this.getNE()};
         int intersectionPos = 0;
@@ -295,10 +297,11 @@ class Box {
                     && testPoints[i].getX() <= greatestX
                     && testPoints[i].getY() >= leastY
                     && testPoints[i].getY() <= greatestY) {
+                //System.out.println("test: true");
                 return true;
             }
         }
-
+        //System.out.println("test: false");
         return false;
     }
     
@@ -413,6 +416,7 @@ class Box {
             
             for (int j = 0; j < currentBoxNum; j++) {
                 if (Box.anyPointsAreInPerfectBox(testPoints, currentHypotenusePoint, currentInnerPoint)) {
+                    System.out.println("PENISISOLFLKSDJFSD");
                     return true;
                 }
                 currentHypotenusePoint.setCoordinates(currentHypotenusePoint.getX() + 2 * currentXDist * angleMultX, currentHypotenusePoint.getY() + 2 * currentYDist * angleMultY);
@@ -519,6 +523,11 @@ class Box {
         return SE;
     }
     
+    public Coordinates[] getCorners(){
+        Coordinates[] corners = {SW, NW, SE, NE};
+        return corners;
+    }
+    
     public Coordinates getCenterPoint(){
         return centerPoint;
     }
@@ -602,8 +611,133 @@ class Box {
     public Box getPerfectBoxAroundBox(){
         return new Box(new Coordinates(this.getLeastXOfBox(), this.getGreatestYOfBox()), new Coordinates(this.getLeastXOfBox(), this.getLeastYOfBox()), new Coordinates(this.getGreatestXOfBox(), this.getGreatestYOfBox()), new Coordinates(this.getGreatestXOfBox(), this.getLeastYOfBox()));
     }
+    
+    public static Coordinates[] removePointsInPerfectBox(Coordinates[] testPoints, Coordinates cornerPointOne, Coordinates cornerPointTwo){
+        float greatestX;
+        float greatestY;
+        float leastX;
+        float leastY;
+        if (cornerPointOne.getX() > cornerPointTwo.getX()) {
+            greatestX = cornerPointOne.getX();
+            leastX = cornerPointTwo.getX();
+        } else {
+            greatestX = cornerPointTwo.getX();
+            leastX = cornerPointOne.getX();
+        }
+
+        if (cornerPointOne.getY() > cornerPointTwo.getY()) {
+            greatestY = cornerPointOne.getY();
+            leastY = cornerPointTwo.getY();
+        } else {
+            greatestY = cornerPointTwo.getY();
+            leastY = cornerPointOne.getY();
+        }
+
+        ArrayList<Coordinates> pointsNotInBoxList = new ArrayList<>();
+        for(Coordinates c : testPoints){
+            if (
+                !(c.getX() >= leastX
+                && c.getX() <= greatestX
+                &&  c.getY() >= leastY
+                &&  c.getY() <= greatestY)
+            ){
+                pointsNotInBoxList.add(c);
+            }
+        }
+
+        //Copy over list of points inside to be returned
+        Coordinates[] pointsNotInBoxArr = new Coordinates[pointsNotInBoxList.size()];
+        for(int i = 0; i < pointsNotInBoxList.size(); i++){
+            pointsNotInBoxArr[i] = pointsNotInBoxList.get(i);
+        }
+        
+        return pointsNotInBoxArr;
+
+    }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    
+    public static Coordinates[] removeAllPointsInRightTriangle(Coordinates startPoint, Coordinates ninetyDegreePoint, Coordinates endPoint, Coordinates[] testPoints){       
+        int angleMultX = startPoint.getX() > endPoint.getX() ? -1 : 1;
+        int angleMultY = startPoint.getY() > endPoint.getY() ? -1 : 1;
+        
+        int innerMultX = 0;
+        int innerMultY = 0;
+        if(Math.abs(startPoint.getX()-ninetyDegreePoint.getX()) < UNIVERSAL_EPSILON_VAL &&
+           Math.abs(endPoint.getY()-ninetyDegreePoint.getY()) < UNIVERSAL_EPSILON_VAL        
+        ){
+            if(angleMultX == 1 && angleMultY == 1){
+                innerMultX = -1;
+                innerMultY = 1;
+            }
+            else if(angleMultX == 1 && angleMultY == -1){
+                innerMultX = -1;
+                innerMultY = -1;   
+            }
+            else if(angleMultX == -1 && angleMultY == -1){
+                innerMultX = 1;
+                innerMultY = -1;   
+            }
+            else{
+                innerMultX = -1;
+                innerMultY = -1;   
+            }
+        }
+        else if(Math.abs(startPoint.getY()-ninetyDegreePoint.getY()) < UNIVERSAL_EPSILON_VAL &&
+                Math.abs(endPoint.getX()-ninetyDegreePoint.getX()) < UNIVERSAL_EPSILON_VAL)
+        {
+            if(angleMultX == 1 && angleMultY == 1){
+                innerMultX = 1;
+                innerMultY = -1;
+            }
+            else if(angleMultX == 1 && angleMultY == -1){
+                innerMultX = 1;
+                innerMultY = 1;   
+            }
+            else if(angleMultX == -1 && angleMultY == -1){
+                innerMultX = -1;
+                innerMultY = 1;   
+            }
+            else{
+                innerMultX = 1;
+                innerMultY = 1;   
+            }
+        }
+        else{
+            System.out.println("asdasdfadsftrnu68ej5e68 KEK f");
+        }
+
+        float xDist = Math.abs(startPoint.getX() - endPoint.getX());
+        float yDist = Math.abs(startPoint.getY() - endPoint.getY());
+        float currentMult = 1;
+
+        int currentBoxNum;
+        float currentXDist;
+        float currentYDist;
+        Coordinates currentHypotenusePoint = new Coordinates();
+        Coordinates currentInnerPoint = new Coordinates();
+        Coordinates[] currentRemovedPointsArr = new Coordinates[0];
+        
+        for (int i = 1; i < 5; i++) {
+            currentMult /= 2;
+            currentBoxNum = (int) (1.0f / (currentMult * 2));
+            currentXDist = xDist * currentMult;
+            currentYDist = yDist * currentMult;
+            currentHypotenusePoint.setCoordinates(startPoint.getX() + currentXDist * angleMultX, startPoint.getY() + currentYDist * angleMultY);
+            currentInnerPoint.setCoordinates(currentHypotenusePoint.getX() + currentXDist * innerMultX, currentHypotenusePoint.getY() + currentYDist * innerMultY);
+
+            for (int j = 0; j < currentBoxNum; j++) {
+                currentRemovedPointsArr = Box.removePointsInPerfectBox(testPoints, currentHypotenusePoint, currentInnerPoint);
+                if(currentRemovedPointsArr.length == 0){
+                    return currentRemovedPointsArr;
+                }
+                currentHypotenusePoint.setCoordinates(currentHypotenusePoint.getX() + 2 * currentXDist * angleMultX, currentHypotenusePoint.getY() + 2 * currentYDist * angleMultY);
+                currentInnerPoint.setCoordinates(currentHypotenusePoint.getX() + currentXDist * innerMultX, currentHypotenusePoint.getY() + currentYDist * innerMultY);
+            }
+        }
+        
+        return currentRemovedPointsArr;
+    }
     
     public boolean anyPointsAreInBox(Coordinates[] testPoints){
         //Box is perfect and angle is therefore 0, 180, etc.
@@ -626,7 +760,7 @@ class Box {
 
         Box perfectBox = this.getPerfectBoxAroundBox();
         if(!perfectBox.anyPointsAreInPerfectBox(testPoints)){
-            System.out.println("No points are in the perfect box around the box");
+            System.out.println("Line 763 - anyPointsAreInBox - No points are in the perfect box around the box");
             return false;
         }
         
@@ -647,31 +781,42 @@ class Box {
             correspondingPointSENE = perfectBox.getSE();
         }
         
+        Coordinates[] cornerPairsArrOne = {SW, SE, NW, SW};
+        Coordinates[] correspondingPointsArr = {correspondingPointSWNW, correspondingPointSENE, correspondingPointNWNE, correspondingPointSWSE};
+        Coordinates[] cornerPairsArrTwo = {NW, NE, NE, SE};
         
-        //System.out.println(Box.anyPointsAreInRightTriangle(SW, correspondingPointSWNW, NW, testPoints)); 
-        //System.out.println(Box.anyPointsAreInRightTriangle(NE, correspondingPointSENE, SE, testPoints)) ;
-        
-        //System.out.println("NW to NE: " + Box.anyPointsAreInRightTriangle(NW, correspondingPointNWNE, NE, testPoints)) ;
-        //System.out.println("Sw -> SE: " + Box.anyPointsAreInRightTriangle(SW, correspondingPointSWSE, SE, testPoints));
-        
-        
-        if(
-         !Box.anyPointsAreInRightTriangle(SW, correspondingPointSWNW, NW, testPoints) &&
-         !Box.anyPointsAreInRightTriangle(NE, correspondingPointSENE, SE, testPoints) &&
-         !Box.anyPointsAreInRightTriangle(NW, correspondingPointNWNE, NE, testPoints) &&
-         !Box.anyPointsAreInRightTriangle(SW, correspondingPointSWSE, SE, testPoints)
-        ){
-            return true;
+        Coordinates[] currentUnremovedPoints;
+        for(int i = 0; i < 4; i++){
+            currentUnremovedPoints = Box.removeAllPointsInRightTriangle(cornerPairsArrOne[i], correspondingPointsArr[i], cornerPairsArrTwo[i], testPoints);
+            if(currentUnremovedPoints.length == 0){
+                return false;
+            }
         }
-        else{
-            return false;
-        }
+        
+        return true;
     }
     
     public boolean checkCollisionWithBox(Box comparingBox) {
+           
+        int relativeCenterMultX;
+        int relativeCenterMultY;
+
+        //See if any points of either are in the shape of the other
+        //This is the most common type of collision that will occur, relatively distances and with shapes close in size
+        //The rest of this method is intended to take care of the more extended cases, like very long shapes
+        //anyPoitnsAreInBox handles if the boxes are perfect or not :D
+        if(
+            this.anyPointsAreInBox(comparingBox.getCorners()) ||
+            comparingBox.anyPointsAreInBox(this.getCorners())   
+         ){
+            System.out.println("asdfasdfadf");
+            return true;
+        }    
         
-        //Handle if a box is perfect or both are perfect      
-    
+        System.out.println("asdfasdfadf");
+        
+        //Handle if both/one boxes(x) are perfect
+        
         Box perfectBoxAroundComparing = comparingBox.getPerfectBoxAroundBox();
         Coordinates[] cornerPairs = {this.getSW(), this.getNW(), this.getSE(), this.getNE(), this.getNW(), this.getNE(), this.getSW(), this.getSE()};
 
@@ -686,7 +831,7 @@ class Box {
         float yIncrement;
         float currentX;
         float currentY;
-        Coordinates[] testPointsOnLine = new Coordinates[128];
+        Coordinates[] testPointsOnLine = new Coordinates[64];
 
         for (int i=0; i < 7; i+=2) {
             //Set the next pair of coordinates to be tested for itnersecting with the perfectBoxAroundComparing
@@ -698,34 +843,55 @@ class Box {
 
             //No points along the line are intersecting the perfect box
             if (intersectingPoints[0] == null && intersectingPoints[1] == null) {
-                //See if points are inside the perfect box itself
-                if (perfectBoxAroundComparing.anyPointsAreInPerfectBox(currentPairPoints)) {
+                //See if both points are inside and set points accordingly\
+                if(perfectBoxAroundComparing.pointIsInPerfectBox(currentPairPoints[0]) && perfectBoxAroundComparing.pointIsInPerfectBox(currentPairPoints[1])){
                     currentComparisonPointOne = currentPairPoints[0];
                     currentComparisonPointTwo = currentPairPoints[1];
-                } //
-                else {
-                    continue;
                 }
-            } //At least one point on the line intersects the perfectBox
-            else if (intersectingPoints[0] == null || intersectingPoints[1] == null) {
-                //Set to the non null intersection point
-                currentComparisonPointOne = intersectingPoints[0] == null ? intersectingPoints[1] : intersectingPoints[0];
-                if (perfectBoxAroundComparing.pointIsInPerfectBox(currentPairPoints[0]))  {
+                
+                //If above is untrue, then points must completely outside and non-intersecting the perfectBox and therefore are not colliding; cont
+                
+                continue;
+                
+            } 
+            //At least one point on the line intersects the perfectBox
+            else if( 
+                (intersectingPoints[0] != null && intersectingPoints[1] == null) ||
+                (intersectingPoints[0] == null && intersectingPoints[1] != null)
+            ){
+                
+                //Set one to intersectingPoint, then find the 
+                currentComparisonPointOne = intersectingPoints[1] != null ? intersectingPoints[1] : intersectingPoints[0];
+                if(perfectBoxAroundComparing.pointIsInPerfectBox(currentPairPoints[0])){
                     currentComparisonPointTwo = currentPairPoints[0];
-                } else if (perfectBoxAroundComparing.pointIsInPerfectBox(currentPairPoints[1]))  {
-                    currentComparisonPointTwo = currentPairPoints[1];
-                } //Neither of the pair points is inside the perfectBoxAroundComparing and so there's no way it intersected comparingBox
-                else {
-                    continue;
                 }
-            } //In this case, it's easy: just set comparisons to the two intersectionPoints
+                else if(perfectBoxAroundComparing.pointIsInPerfectBox(currentPairPoints[1])){
+                    currentComparisonPointTwo = currentPairPoints[1];
+                }
+                //If one of the pair points is exactly on the outside border of the perfect box
+                else{
+                    //This would only be true if one of the pair points is exactly equal to one of the comparingBox's corners
+                    Coordinates[] corners = comparingBox.getCorners();
+                    //Loop to see if the intersectingPoint is one of the comparingBox's corners
+                    for(Coordinates c : corners){
+                        if(
+                            Math.abs(currentComparisonPointOne.getX()-c.getX()) < UNIVERSAL_EPSILON_VAL &&   
+                            Math.abs(currentComparisonPointOne.getY()-c.getY()) < UNIVERSAL_EPSILON_VAL
+                        ){
+                            return true;
+                        }
+                    }
+                    return false;
+                }
+            } 
+            //In this case, it's easy: just set comparisons to the two intersectionPoints
             else if (intersectingPoints[0] != null && intersectingPoints[1] != null) {
                 currentComparisonPointOne = intersectingPoints[0];
                 currentComparisonPointTwo = intersectingPoints[1];
             } else {
                 System.out.println("Failure at 41");
             }
-
+            
             //Shift these variable declaraionts to the very beginning of the inner loop
             angleMultX = currentComparisonPointOne.getX() > currentComparisonPointTwo.getX() ? -1 : 1;
             angleMultY = currentComparisonPointOne.getY() > currentComparisonPointTwo.getY() ? -1 : 1;
@@ -733,7 +899,7 @@ class Box {
             yIncrement = Math.abs(currentComparisonPointOne.getY() - currentComparisonPointTwo.getY() / 128) * angleMultY;
             currentX = currentComparisonPointOne.getX();
             currentY = currentComparisonPointOne.getY();
-            for (int j = 0; j < 127; j++) {
+            for (int j = 0; j < 63; j++) {
                 currentX += xIncrement;
                 currentY += yIncrement;
                 testPointsOnLine[i] = new Coordinates(currentX, currentY);
@@ -741,9 +907,7 @@ class Box {
 
             if (comparingBox.anyPointsAreInBox(testPointsOnLine)) {
                 return true;
-            } else {
-                continue;
-            }
+            } 
         }
         
         return false;
