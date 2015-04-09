@@ -1,0 +1,189 @@
+    public static Coordinates perfLineIntersectsPerfLineAt(Coordinates perfLineStartOne, Coordinates perfLineEndOne, Coordinates perfLineStartTwo, Coordinates perfLineEndTwo) {
+
+        float regularDimLineOne;
+        float regularDimLineTwo;
+        float leastDimOfLineOne = 0;
+        float greatestDimOfLineOne = 0;
+        float leastDimOfLineTwo = 0;
+        float greatestDimOfLineTwo = 0;
+
+        boolean oneXWise = false;
+        boolean twoXWise = false;
+
+        //Find start line's dims
+        if (Math.abs(perfLineStartOne.getX() - perfLineEndOne.getX()) < UNIVERSAL_EPSILON_VAL) {
+            
+            oneXWise = true;
+            regularDimLineOne = perfLineStartOne.getX();
+            //Find the least and greatest of the varying dimension of the line
+            if (perfLineStartOne.getY() >= perfLineEndOne.getY()) {
+                leastDimOfLineOne = perfLineEndOne.getY();
+                greatestDimOfLineOne = perfLineStartOne.getY();
+            } else if (perfLineStartOne.getY() <= perfLineEndOne.getY()) {
+                leastDimOfLineOne = perfLineStartOne.getY();
+                greatestDimOfLineOne = perfLineEndOne.getY();
+            } else {
+                //Equal
+            }
+        } 
+        else if (Math.abs(perfLineStartOne.getY() - perfLineEndOne.getY()) < UNIVERSAL_EPSILON_VAL) {
+            oneXWise = false;
+            regularDimLineOne = perfLineStartOne.getY();
+            //Find the greatest and least of the varying dimensions of the line
+            if (perfLineStartOne.getX() >= perfLineEndOne.getX()) {
+                leastDimOfLineOne = perfLineEndOne.getX();
+                greatestDimOfLineOne = perfLineStartOne.getX();
+            } else if (perfLineStartOne.getX() <= perfLineEndOne.getX()) {
+                leastDimOfLineOne = perfLineStartOne.getX();
+                greatestDimOfLineOne = perfLineEndOne.getX();
+            } else {
+                //Equal?
+            }
+        } 
+        else {
+            //Line one is not a perfect line, waddafuck
+            System.out.println("Line one is not perfect. Returning null.");
+            return null;
+        }
+  
+        //Find second line's dims
+        if (Math.abs(perfLineStartTwo.getX()) - perfLineEndTwo.getX() < UNIVERSAL_EPSILON_VAL) {
+            twoXWise = true;
+            regularDimLineTwo = perfLineStartTwo.getX();
+            //Find varying dimension least and greatest, etc.
+            if (perfLineStartTwo.getY() >= perfLineEndTwo.getY()) {
+                leastDimOfLineTwo = perfLineEndTwo.getY();
+                greatestDimOfLineTwo = perfLineStartTwo.getY();
+            } else if (perfLineStartTwo.getY() <= perfLineEndTwo.getY()) {
+                leastDimOfLineTwo = perfLineStartTwo.getY();
+                greatestDimOfLineTwo = perfLineEndTwo.getY();
+            } else {
+                //Equal?
+            }
+        } 
+        else if (Math.abs(perfLineStartTwo.getY() - perfLineEndTwo.getY()) < UNIVERSAL_EPSILON_VAL) {
+            twoXWise = false;
+            regularDimLineTwo = perfLineStartTwo.getY();
+            if (perfLineStartTwo.getX() >= perfLineEndTwo.getX()) {
+                leastDimOfLineTwo = perfLineEndTwo.getX();
+                greatestDimOfLineTwo = perfLineStartTwo.getX();
+            } else if (perfLineStartTwo.getX() <= perfLineEndTwo.getX()) {
+                leastDimOfLineTwo = perfLineStartTwo.getX();
+                greatestDimOfLineTwo = perfLineEndTwo.getX();
+            } else {
+                //Equal?
+            }
+        } else {
+            //Line two is not perfect, waddafuck
+            System.out.println("Line two is not perfect. Returning null.");
+            return null;
+        }
+
+        //System.out.println(oneXWise);
+        //System.out.println(twoXWise);
+        
+        //Start comparing and finding points
+        if (!oneXWise && twoXWise) {
+            if ((leastDimOfLineOne <= regularDimLineTwo && regularDimLineTwo <= greatestDimOfLineOne) &&
+                (leastDimOfLineTwo <= regularDimLineOne && regularDimLineOne <= greatestDimOfLineTwo)
+            ) {
+                return new Coordinates(perfLineStartTwo.getX(), perfLineStartOne.getY());
+            }
+            else{
+                return null;
+            }
+        } 
+        else if (oneXWise && !twoXWise) {
+            if ((leastDimOfLineOne <= regularDimLineTwo && regularDimLineTwo <= greatestDimOfLineOne) &&
+                (leastDimOfLineTwo <= regularDimLineOne && regularDimLineOne <= greatestDimOfLineTwo)
+            ) {
+                return new Coordinates(perfLineStartOne.getX(), perfLineStartTwo.getY());
+            }
+        } 
+        else if ((oneXWise && twoXWise) || 
+                (!oneXWise && !twoXWise)
+        ){
+            /*
+             ALL OF THE BELOW CODE IS APPLIED ONLY WHEN ONEXWISE && TWOXWISE || !ONEXWISE && !TWOXWISE, KEEP CALM AND CARRY ON WITH OTHERS
+             */
+            //Check if regular dims are the same
+            if (!(Math.abs(regularDimLineOne - regularDimLineTwo) < UNIVERSAL_EPSILON_VAL)) {
+                //System.out.println("RegularDims are not the same");
+                return null;
+            }
+            //Check if either are within the other's bounds
+            if (!((leastDimOfLineOne < leastDimOfLineTwo && leastDimOfLineTwo < greatestDimOfLineOne)
+                    || (leastDimOfLineOne < greatestDimOfLineTwo && greatestDimOfLineTwo < greatestDimOfLineOne)
+                    || (leastDimOfLineTwo < leastDimOfLineOne && leastDimOfLineOne < greatestDimOfLineTwo)
+                    || (leastDimOfLineTwo < greatestDimOfLineOne && greatestDimOfLineOne < greatestDimOfLineTwo))) {
+
+                return null;
+            }
+
+            //Only 2 possibilites here
+            //Check if line one's points are both inside lineTwo
+            if ((leastDimOfLineTwo < leastDimOfLineOne && greatestDimOfLineOne < greatestDimOfLineTwo)
+                    && (leastDimOfLineTwo < greatestDimOfLineOne && greatestDimOfLineOne < greatestDimOfLineTwo)) {
+                float distOne = Box.getDistanceBetween(perfLineStartOne, perfLineStartTwo);
+                float distTwo = Box.getDistanceBetween(perfLineEndOne, perfLineStartTwo);
+
+                //Find the point of perfLineOne that is closest to perfLineStartOne
+                //If the start point is farther away from perfLineTwo's start
+                if (distOne > distTwo) {
+                    return perfLineEndOne;
+                } //If the end point is farther away from perfLineTwo's start
+                else if (distTwo > distOne) {
+                    return perfLineStartOne;
+                } //If the distance is equal, then perfLine's points are right on top of each other
+                else {
+                    return perfLineStartOne;
+                }
+            } //At least one point, if not two, are inside lineOne
+            else {
+                //Find which points of lineTwo are within line One's bounds
+                Coordinates[] lineTwoPoints = {perfLineStartTwo, perfLineEndTwo};
+                ArrayList<Coordinates> pointsBetweenLineOne = new ArrayList<Coordinates>(2);
+                int pointsCount = 0;
+                for (int i = 0; i < 2; i++) {
+                    if (twoXWise) {
+                        if (leastDimOfLineOne < lineTwoPoints[i].getY() && lineTwoPoints[i].getY() < greatestDimOfLineOne) {
+                            pointsBetweenLineOne.add(lineTwoPoints[i]);
+                            pointsCount++;
+                        } else if (!twoXWise) {
+                            if (leastDimOfLineOne < lineTwoPoints[i].getX() && lineTwoPoints[i].getX() < greatestDimOfLineOne) {
+                                pointsBetweenLineOne.add(lineTwoPoints[i]);
+                                pointsCount++;
+                            }
+                        } else {
+                            //IDK
+                        }
+                    }
+
+                    if (pointsBetweenLineOne.size() == 1) {
+                        return pointsBetweenLineOne.get(0);
+                    } //Both points of lineTwo are between lineOne
+                    else if (pointsBetweenLineOne.size() == 2) {
+                        float distOne = Box.getDistanceBetween(perfLineStartTwo, perfLineStartOne);
+                        float distTwo = Box.getDistanceBetween(perfLineEndTwo, perfLineStartOne);
+
+                        //Find the point of perfLineTwo that is closest to perfLineStartOne
+                        //If startPoit of line two is farther away than endPoint
+                        if (distOne > distTwo) {
+                            return perfLineEndTwo;
+                        } //If the end point is farther away from perfLineOne's start
+                        //If end point of lineTwo is farthere away than start point
+                        else if (distTwo > distOne) {
+                            return perfLineStartTwo;
+                        } //If the distance is equal, then perfLine's points are right on top of each other
+                        else {
+                            return perfLineStartTwo;
+                        }
+                    } else {
+                        //IDK
+                    }
+                }
+            }
+        }
+        System.out.println("Shouldn't happen: perfLineIntersectsPerfLineAt: returning null");
+        return null;
+    }
