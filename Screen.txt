@@ -1,0 +1,88 @@
+package boxgui;
+
+import java.util.*;
+
+public class Screen {
+    float xSpan;
+    float ySpan;
+    Coordinates screenCenter;
+    Coordinates SWofScreen;
+    Coordinates NWofScreen;
+    Coordinates SEofScreen;
+    Coordinates NEofScreen;
+    Box[] boxesOnScreen;
+    
+    public Screen(float xrange, float yrange, Coordinates center){
+        xSpan = xrange;
+        ySpan = yrange;
+        screenCenter = center;
+        
+        SWofScreen = new Coordinates(center.getX()-xSpan*0.5f, center.getY()-ySpan*0.5f);
+        NWofScreen = new Coordinates(center.getX()-xSpan*0.5f, center.getY()+ySpan*0.5f);
+        SEofScreen = new Coordinates(center.getX()+xSpan*0.5f, center.getY()-ySpan*0.5f);
+        NEofScreen = new Coordinates(center.getX()+xSpan*0.5f, center.getY()+ySpan*0.5f);
+        
+    }
+    
+    public void updateBoxesOnScreen(Box[] boxArr){
+        boxesOnScreen = this.findAllBoxesOnScreen(boxArr);
+        System.out.println(boxesOnScreen.length);
+    }
+    
+    public void updateScreen(Box[] boxArr){
+        updateBoxesOnScreen(boxArr);
+        //Other stuff?
+    }
+    
+    public boolean pointIsOnScreen(Coordinates point){
+        if(
+            (SWofScreen.getX() <= point.getX() && point.getX() <= SEofScreen.getX()) &&
+            (SWofScreen.getY() <= point.getY() && point.getY() <= NWofScreen.getY())
+        ){
+            return true;
+        }
+        return false;
+    }
+    
+    public Box[] findAllBoxesOnScreen(Box[] boxArr){
+        ArrayList<Box> testBoxesList = new ArrayList<Box>();
+        //Find corner points of boxes that are inside the screen and add those corners'
+        for(Box b : boxArr){
+            coordinateInnerLoop:
+            for(Coordinates c : b.getCorners()){
+                if(this.pointIsOnScreen(c)){
+                    testBoxesList.add(b);
+                    //Avoids getting more than one of the same box into the list
+                    break coordinateInnerLoop;
+                }
+            }
+        }
+
+        Box[] validBoxesArr = new Box[testBoxesList.size()];
+        for(int i = 0; i < validBoxesArr.length; i++){
+            validBoxesArr[i] = testBoxesList.get(i);
+        }
+        //System.out.println("validBoxes length: " + validBoxesArr.length);
+        return validBoxesArr;
+    }
+    
+    public Box[] getBoxesOnScreen(){
+        return boxesOnScreen;
+    }
+    
+    public float getXSpan(){
+        return xSpan;
+    }
+    
+    public float getYSpan(){
+        return ySpan;
+    }
+    
+    public void printScreenCorners(){
+        System.out.println(SWofScreen.getX()+", " + SWofScreen.getY());
+        System.out.println(NWofScreen.getX()+", " + NWofScreen.getY());
+        System.out.println(SEofScreen.getX()+", " + SEofScreen.getY());
+        System.out.println(NEofScreen.getX()+", " + NEofScreen.getY());
+    }
+    
+}
