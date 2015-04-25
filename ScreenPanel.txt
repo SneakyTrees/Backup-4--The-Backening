@@ -1,0 +1,90 @@
+package boxgui;
+
+import java.awt.*;
+import javax.swing.*; 
+import java.util.*;
+
+public class ScreenPanel extends JPanel{
+    
+    Screen renderingScreen;
+    
+    public ScreenPanel(Screen screen){
+        renderingScreen = screen;
+    }
+   
+    @Override
+    public void paintComponent(Graphics g){
+        System.out.println("boxes drawn");
+        //this.drawLineOnPanel(g);
+        this.drawAllBoxesOnScreen(g, renderingScreen);
+    }
+    
+    public void drawLineOnPanel(Graphics g){
+        int x = (int) (this.getWidth()*0.25f);
+        int y = (int) (this.getHeight()*0.25f);
+        int x2 = (int) (this.getWidth()*0.75f);
+        int y2 = (int) (this.getHeight()*0.75f);
+        
+        g.drawLine(x, y, x2, y2);
+        
+        x+=100;
+        y+=150;
+        x2+=100;
+        y2+=150;
+        
+        g.drawLine(x, y, x2, y2);
+    }
+    
+    public void printDims(){
+        System.out.println("WIDTH: " + WIDTH);
+        System.out.println("HEIGHT: " + HEIGHT);
+    }
+    
+    public void drawAllBoxesOnScreen(Graphics g, Screen s){
+        
+        //Graphics passed to it by paint
+        Graphics drawer =  g;
+
+        float xScaling = s.getXSpan()/this.getWidth();
+        float yScaling = s.getYSpan()/this.getHeight();
+        
+        //System.out.println(s.getBoxesOnScreen());
+        
+        if(s.getBoxesOnScreen().length == 0){
+            System.out.println("No boxes on screen?");
+            return;
+        }
+        
+        Coordinates currentScaledCenterPoint;
+        Coordinates currentScaledCornerOne;
+        Coordinates currentScaledCornerTwo;
+        Coordinates currentScaledCornerThree;
+        Coordinates currentScaledCornerFour;
+        float currentAngleToCorners;
+        float currentDistToCorners;
+        
+        for(Box b : s.getBoxesOnScreen()){
+            currentScaledCenterPoint = new Coordinates(b.getCenterPoint().getX()*xScaling, b.getCenterPoint().getY()*yScaling);
+            //Scaling is unnecessary here because the angle is irrelevant of actual distance, it stays the same
+            currentAngleToCorners = (float) ((Math.atan((0.5f * b.getHeight()) / (0.5f * b.getWidth()))) * (180.0f / Math.PI));
+            currentDistToCorners = (float) ((0.5f * b.getHeight() * xScaling) / (float) (Math.sin(Math.toRadians(currentAngleToCorners))));
+            
+            //System.out.println("currentDistToCorners: " + currentDistToCorners);
+            //System.out.println("currentAngleTocoerners: " + currentAngleToCorners);
+            
+            currentScaledCornerOne = Box.getEndPointOfLine(currentDistToCorners, Box.convertOverflowingAngle(b.getBoxAngle()+currentAngleToCorners), currentScaledCenterPoint);
+            currentScaledCornerTwo = Box.getEndPointOfLine(currentDistToCorners, Box.convertNegativeAngle(b.getBoxAngle()-currentAngleToCorners), currentScaledCenterPoint);
+            currentScaledCornerThree = Box.getEndPointOfLine(currentDistToCorners, Box.convertOverflowingAngle(b.getBoxAngle()+currentAngleToCorners+180), currentScaledCenterPoint);
+            currentScaledCornerFour = Box.getEndPointOfLine(currentDistToCorners, Box.convertNegativeAngle(b.getBoxAngle()-currentAngleToCorners-180), currentScaledCenterPoint);
+            Coordinates[] cornerArr = {currentScaledCornerOne, currentScaledCornerTwo, currentScaledCornerTwo, currentScaledCornerThree, currentScaledCornerThree, currentScaledCornerFour, currentScaledCornerFour, currentScaledCornerOne};
+            
+            for(int i = 0; i < 7; i++){
+                drawer.drawLine((int) cornerArr[i].getX(), (int) cornerArr[i].getY(),(int) cornerArr[i+1].getX(), (int) cornerArr[i+1].getY());
+            }
+        }
+    }
+    
+    public Screen getRenderingScreen(){
+        return renderingScreen;
+    }
+}
