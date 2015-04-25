@@ -1,0 +1,29 @@
+package boxgui;
+
+public class TransformEvent extends TimeEvent{
+    float xDist;
+    float yDist;
+    Box transformingBox;
+    
+    public TransformEvent(float time, float xdist, float ydist, Box transbox){
+        timeVal = time;
+        timeRemaining = time;
+        xDist = xdist;
+        yDist = ydist;
+        transformingBox = transbox;
+    }
+    
+    @Override
+    public boolean executeEvent(float delta){
+        timeRemaining -= delta;
+        if(timeRemaining = 0){
+            float remainingVal = timeVal-(timeVal-Math.abs(timeVal-delta));
+            Percentage of timeVal currently done
+            xDist = deltatimeVal + timeRemaining;
+            transformingBox.transformBoxBy();
+            return false;
+        }
+        
+        return true;
+    }
+}
