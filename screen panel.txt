@@ -1,0 +1,102 @@
+package boxgui;
+
+import java.awt.*;
+import java.awt.event.*;
+import javax.swing.*; 
+import java.util.*;
+
+public class ScreenPanel extends JPanel implements KeyListener{
+    
+    GameManager screenPanelManager;
+    
+    public ScreenPanel(GameManager manager){
+        screenPanelManager = manager;
+        this.setFocusable(true);
+        this.addKeyListener(this);
+    }
+   
+    @Override
+    public void paintComponent(Graphics g){
+        //Clear the JPanel of previous graphics, lines, etc.
+        super.paintComponent(g);
+        
+        //Make sure that the game's screen has picked up any boxes that have appeared in its bounds since last iteration
+        screenPanelManager.getGameScreen().updateBoxesOnScreen(screenPanelManager.getAllEntitiesArr());
+        
+        //Aaand finally just draw all the boxes that are on the screen onto this Panel 
+        this.drawBoxes(g, screenPanelManager.getGameScreen().getBoxesOnScreen());
+    }
+    
+    @Override
+    public void keyTyped(KeyEvent ke){
+
+    }
+    
+    @Override
+    public void keyReleased(KeyEvent ke){
+
+    }
+    
+    @Override 
+    public void keyPressed(KeyEvent ke){
+        //System.out.println("inside keyTyped");
+        //System.out.println(ke.getKeyCode());
+        if(ke.getKeyCode() == KeyEvent.VK_W){
+            //System.out.println("w type");
+            screenPanelManager.moveEntity(0, -50, screenPanelManager.getGamePlayer());
+            this.repaint();
+        }
+        if(ke.getKeyCode() == KeyEvent.VK_A){
+            //System.out.println("a type");
+            screenPanelManager.moveEntity(-50, 0, screenPanelManager.getGamePlayer());
+            this.repaint();
+        }
+        if(ke.getKeyCode() == KeyEvent.VK_S){
+            //System.out.println("s type");
+            screenPanelManager.moveEntity(0, 50, screenPanelManager.getGamePlayer());
+            this.repaint();
+        }
+        if(ke.getKeyCode() == KeyEvent.VK_D){
+            //System.out.println("d type");
+            screenPanelManager.moveEntity(50, 0, screenPanelManager.getGamePlayer());
+            this.repaint();
+        }
+        if(ke.getKeyCode() == KeyEvent.VK_T){
+            screenPanelManager.addTimeEvent(new TranslateBoxEvent(screenPanelManager, 1, 200, 300, screenPanelManager.getGamePlayer()));
+            screenPanelManager.addEvent(new TrackBoxTowardsBox(screenPanelManager, screenPanelManager.getHostileEntityListAt(0), screenPanelManager.getGamePlayer()));
+            this.repaint();
+        }
+    }
+    
+    public void drawBoxes(Graphics g, Box[] boxesToBeDrawn){
+        
+        if(boxesToBeDrawn == null || boxesToBeDrawn.length == 0){
+            System.out.println("boxesTobeDrawn == null");
+            return;
+        }
+        
+        for(Box b : boxesToBeDrawn){
+            g.drawLine(
+                    (int) b.getSW().getX(), (int) b.getSW().getY(), (int) b.getNW().getX(), (int) b.getNW().getY()
+            );
+            g.drawLine(
+                    (int) b.getNW().getX(), (int) b.getNW().getY(), (int) b.getNE().getX(), (int) b.getNE().getY()
+            );
+            g.drawLine(
+                    (int) b.getNE().getX(), (int) b.getNE().getY(), (int) b.getSE().getX(), (int) b.getSE().getY()
+            );
+            g.drawLine(
+                    (int) b.getSE().getX(), (int) b.getSE().getY(), (int) b.getSW().getX(), (int) b.getSW().getY()
+            );
+        }
+    }
+    
+    public void printDims(){
+        System.out.println("WIDTH: " + WIDTH);
+        System.out.println("HEIGHT: " + HEIGHT);
+    }
+    
+    public GameManager getPanelManager(){
+        return screenPanelManager;
+    }
+}

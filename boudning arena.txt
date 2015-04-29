@@ -1,0 +1,62 @@
+package boxgui;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.*;
+import java.util.*;
+
+public class BoundArena{
+   public float minimumX;
+   public float minimumY;
+   public float maximumX;
+   public float maximumY;
+   
+   public BoundArena(float minx, float miny, float maxx, float maxy){
+       minimumX = minx;
+       minimumY = miny;
+       maximumX = maxx;
+       maximumY = maxy;
+   }
+   
+   public Coordinates[] removePointsInsideBoundArena(Coordinates[] testArr){
+       ArrayList<Coordinates> pointsOutsideArenaList = new ArrayList<Coordinates>();
+       for(Coordinates c : testArr){
+           if(!(this.coordinatesAreInBoundArena(c))){
+               pointsOutsideArenaList.add(c);
+           }
+       }
+       
+       Coordinates[] pointsOutsideArenaArr = new Coordinates[pointsOutsideArenaList.size()];
+       for(int i = 0; i < pointsOutsideArenaArr.length; i++){
+           pointsOutsideArenaArr[i] = pointsOutsideArenaList.get(i);
+       }
+       return pointsOutsideArenaArr;
+   }
+   
+   public boolean coordinatesAreInBoundArena(Coordinates testCoords){
+       if(
+          (minimumX <= testCoords.getX() && testCoords.getX() <= maximumX) &&
+          (minimumY <= testCoords.getY() && testCoords.getY() <= maximumY) 
+       ){
+        return true;
+       }
+       
+       return false;
+    }
+   
+   public float getMinX(){
+       return minimumX;
+   }
+   
+   public float getMaxX(){
+       return maximumX;
+   }
+   
+   public float getMinY(){
+       return minimumY;
+   }
+   
+   public float getMaxY(){
+       return maximumY;
+   }
+}

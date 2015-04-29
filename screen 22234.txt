@@ -1,0 +1,53 @@
+package boxgui;
+
+import java.util.*;
+
+public class Screen extends Box{
+    
+    Box[] boxesOnScreen;
+    
+    public Screen(float xrange, float yrange, float angle, Coordinates center){
+        super(xrange, yrange, angle, center);
+    }  
+    
+    public void updateBoxesOnScreen(Box[] boxArr){
+        boxesOnScreen = this.findAllBoxesOnScreen(boxArr);
+    }
+    
+    public Box[] findAllBoxesOnScreen(Box[] boxArr){
+        ArrayList<Box> testBoxesList = new ArrayList<Box>();
+        //Find corner points of boxes that are inside the screen and add those corners'
+        for(Box b : boxArr){
+            coordinateInnerLoop:
+            for(Coordinates c : b.getCorners()){
+                if(this.pointIsOnScreen(c)){
+                    testBoxesList.add(b);
+                    //Avoids getting more than one of the same box into the list
+                    break coordinateInnerLoop;
+                }
+            }
+        }
+
+        Box[] validBoxesArr = new Box[testBoxesList.size()];
+        for(int i = 0; i < validBoxesArr.length; i++){
+            validBoxesArr[i] = testBoxesList.get(i);
+        }
+        //System.out.println("validBoxes length: " + validBoxesArr.length);
+        return validBoxesArr;
+    }
+    
+    //In no way does this duplicate pointIsInPerfectBox(Coordinates c) from Box >.>
+    public boolean pointIsOnScreen(Coordinates point){
+        if(
+            (SW.getX() <= point.getX() && point.getX() <= SE.getX()) &&
+            (SW.getY() <= point.getY() && point.getY() <= NW.getY())
+        ){
+            return true;
+        }
+        return false;
+    }
+    
+    public Box[] getBoxesOnScreen(){
+        return boxesOnScreen;
+    }
+}

@@ -1,0 +1,50 @@
+package boxgui;
+
+import java.io.;
+import javax.swing.;
+import java.util.;
+
+public class main {
+    public static void main(String[] args){
+        Preparation code and whatnot goesh
+        ex. first line would init the actual window Window w = new Window(200, 200);
+        The init the GameManager object with screen size, arena, all boxes, etc. 
+        Main game loop starts here and continues
+        
+        Window w = new Window(400, 500);
+        
+        Screen s = new Screen(500, 400, 0, new Coordinates(200, 250));
+        BoundArena ba = new BoundArena(0, 0, 400, 500);
+        PlayerBox pb = new PlayerBox(125, 75, 0, new Coordinates(200, 300));
+        ArrayListEntityBox hbs = new ArrayListEntityBox();
+        
+        GameManager gameManagerThing = new GameManager(s, ba ,pb, hbs);
+        ScreenPanel sp = new ScreenPanel(gameManagerThing);
+        
+        w.add(sp);
+        w.repaint();
+        
+        gameManagerThing.addHostileEntity(new HostileBox(25, 100, 34, new Coordinates(200, 300)));
+        
+        double timeDelta;
+        long previousTime = System.nanoTime();
+        
+        boolean gameRunning = true;
+        while(gameRunning){
+            timeDelta = (System.nanoTime()-previousTime)1000000000.0;
+            
+            gameManagerThing.processTimeEventQueue(timeDelta);
+            gameManagerThing.processEventQueue();
+            
+            Box.printCoordinates(gameManagerThing.getGamePlayer().getSW());
+            
+            System.out.println(currentWidth  + gameManagerThing.getGamePlayer().getWidth() +  currentHeight  + gameManagerThing.getGamePlayer().getHeight());
+            Box.printCoordinates(gameManagerThing.getGamePlayer().getCenterPoint());
+            
+            previousTime = System.nanoTime();
+            w.repaint();
+        }
+                
+                
+    }
+}

@@ -1,0 +1,158 @@
+package boxgui;
+
+import java.util.*;
+
+public class GameManager {
+
+    Screen gameScreen;
+    BoundArena gameArena;
+    PlayerBox gamePlayer;
+    ArrayList<EntityBox> hostileEntitiesList = new ArrayList<EntityBox>();
+    ArrayList<EntityBox> allEntitiesList = new ArrayList<EntityBox>();
+    ArrayList<TimeEvent> currentTimeEventQueue = new ArrayList<TimeEvent>();
+    ArrayList<Event> currentEventQueue = new ArrayList<Event>();
+
+    public GameManager(Screen gs, BoundArena ga, PlayerBox player, ArrayList<EntityBox> hostEnts) {
+        gameScreen = gs;
+        gameArena = ga;
+        gamePlayer = player;
+        hostileEntitiesList = hostEnts;
+        allEntitiesList = hostileEntitiesList;
+        allEntitiesList.add(gamePlayer);
+        
+        EntityBox[] allEntitiesInArenaArr = new EntityBox[allEntitiesList.size()];
+        for(int i = 0; i < allEntitiesList.size(); i++){
+            allEntitiesInArenaArr[i] = allEntitiesList.get(i);
+        }
+
+        gs.updateBoxesOnScreen(allEntitiesInArenaArr);
+        
+    }
+    
+    public EntityBox getHostileEntityListAt(int index){
+        return hostileEntitiesList.get(index);
+    }
+    
+    public void addTimeEvent(TimeEvent te){
+        //System.out.println("te added");
+        currentTimeEventQueue.add(te);
+    }
+    
+    public void addEvent(Event e){
+        currentEventQueue.add(e);
+    }
+    
+    public void processTimeEventQueue(double delta){
+       // System.out.println(currentTimeEventQueue.size());
+        for(int i = 0; i < currentTimeEventQueue.size(); i++){
+            if(!(currentTimeEventQueue.get(i).executeEvent(delta))){
+                currentTimeEventQueue.remove(i);
+                i--;
+            }
+        }
+    }
+    
+    public void processEventQueue(){
+        for(int i = 0; i < currentEventQueue.size(); i++){
+            if(!currentEventQueue.get(i).executeEvent()){
+                currentEventQueue.remove(i);
+                i--;
+            }
+        }
+    }
+
+    public void addHostileEntity(HostileBox hb){
+        hostileEntitiesList.add(hb);
+    }
+    
+    public void moveEntity(float xDist, float yDist, Box testingBox) {
+        Coordinates[] trialCoords = {
+            new Coordinates(testingBox.getSW().getX() + xDist, testingBox.getSW().getY() + yDist),
+            new Coordinates(testingBox.getNW().getX() + xDist, testingBox.getNW().getY() + yDist),
+            new Coordinates(testingBox.getSE().getX() + xDist, testingBox.getSE().getY() + yDist),
+            new Coordinates(testingBox.getNE().getX() + xDist, testingBox.getNE().getY() + yDist)
+        };
+
+        //System.out.println("Inside moveEnt");
+        
+        Coordinates[] removedPointsArr = gameArena.removePointsInsideBoundArena(trialCoords);
+        //System.out.println("moveent");
+        if (removedPointsArr.length != 0) {
+            //System.out.println("edge time");
+            float[] trialCoordsXs = new float[trialCoords.length];
+            float[] trialCoordsYs = new float[trialCoords.length];
+            for (int i = 0; i < trialCoordsXs.length; i++) {
+                trialCoordsXs[i] = trialCoords[i].getX();
+                trialCoordsYs[i] = trialCoords[i].getY();
+            }
+
+            float edgeXCoordinate;
+            float edgeYCoordinate;
+            float remainingDistX = xDist;
+            float remainingDistY = yDist;
+
+            //Handle XDist
+            if (xDist == 0) {
+
+            } //XDist is positive
+            else if (Math.abs(xDist) == xDist) {
+                //Find the x that will be outside the box, the greatest one which will determine the distance we need to back it up
+                edgeXCoordinate = Box.findGreatestFloatOf(trialCoordsXs);
+                remainingDistX = xDist - (edgeXCoordinate - gameArena.getMaxX());
+            } //XDist is negative
+            else if (Math.abs(xDist) != xDist) {
+                edgeXCoordinate = Box.findLeastFloatOf(trialCoordsXs);
+                remainingDistX = (Math.abs(xDist) - (gameArena.getMinX() - edgeXCoordinate)) * -1;
+            } else {
+                System.out.println("sindie movePlayerEnt, DIK");
+            }
+
+            //Handle yDist
+            if (yDist == 0) {
+
+            } else if (Math.abs(yDist) == yDist) {
+                //Find the x that will be outside the box, the greatest one which will determine the distance we need to back it up
+                edgeYCoordinate = Box.findGreatestFloatOf(trialCoordsYs);
+                remainingDistY = yDist - (edgeYCoordinate - gameArena.getMaxY());
+            } //XDist is negative
+            else if (Math.abs(yDist) != yDist) {
+                edgeYCoordinate = Box.findLeastFloatOf(trialCoordsYs);
+                remainingDistY = (Math.abs(yDist) - (gameArena.getMinY() - edgeYCoordinate)) * -1;
+            } else {
+                System.out.println("sindie movePlayerEnt, DIK");
+            }
+
+            testingBox.translateBox(remainingDistX, remainingDistY);
+
+        } else if (removedPointsArr.length == 0) {
+            testingBox.translateBox(xDist, yDist);
+        } else {
+            System.out.println("wat");
+        }
+    }
+
+    public BoundArena getGameArena() {
+        return gameArena;
+    }
+    
+    public Screen getGameScreen(){
+        return gameScreen;
+    }
+    
+    public PlayerBox getGamePlayer(){
+        return gamePlayer;
+    }
+    
+    public ArrayList<EntityBox> getAllEntitiesList(){
+        return allEntitiesList;
+    }
+    
+    public EntityBox[] getAllEntitiesArr(){
+        EntityBox[] returnCopy = new EntityBox[allEntitiesList.size()];
+        for(int i = 0; i < returnCopy.length; i++){
+            returnCopy[i] = allEntitiesList.get(i);
+        }
+        return returnCopy;
+    }
+
+}
