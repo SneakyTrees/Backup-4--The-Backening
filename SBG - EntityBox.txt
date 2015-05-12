@@ -1,0 +1,133 @@
+package stupiderboxgame;
+
+public class EntityBox extends PerfectBox {
+
+    float health;
+    float speed;
+
+    public EntityBox(float w, float h, Coordinates center, float hp, float sped) {
+        super(w, h, center);
+        health = hp;
+        speed = sped;
+    }
+
+    public void handleCollisionWithScreenBorder(float xDist, float yDist, Screen s) {
+        //Do I actually need these? Fuck it im lazy and tired well do it anyway
+        int xDirectionalMult;
+        int yDirectionalMult;
+        
+        float remainingXDist = 0;
+        if(Math.abs(xDist-0) < UNIVERSAL_EPSILON_VAL){
+            xDirectionalMult = 1;
+            remainingXDist = 0;
+        }
+        else if(xDist == Math.abs(xDist)){
+            //If the box's moving by this xDirection would not violate things, just move it by that x dist
+            if(this.findGreatestX()+xDist < s.getMaxX()){
+                remainingXDist = xDist;
+                xDirectionalMult = 1;
+            }
+            else if(Math.abs(this.findGreatestX()-s.getMaxX()) < UNIVERSAL_EPSILON_VAL){
+                remainingXDist = 0;
+                xDirectionalMult = 1;
+            }
+            else{
+                remainingXDist = s.getMaxX()-this.findGreatestX();
+                xDirectionalMult = 1;
+            }
+        }
+        else if(xDist != Math.abs(xDist)){
+            if(this.findLeastX()+xDist > s.getMinX()){
+                remainingXDist = xDist;
+                xDirectionalMult = 1;
+            }
+            //You're already at the border and trying to move even more negatively, so no distance is to be moved
+            else if(Math.abs(this.findLeastX()-s.getMinX()) < UNIVERSAL_EPSILON_VAL){
+                remainingXDist = 0;
+                xDirectionalMult = 1;
+            }
+            //Move the box that remaining negative distance to just be on the border edge of the screen
+            else{
+                remainingXDist = this.findLeastX()-s.getMinX();
+                xDirectionalMult = -1;
+            }
+        }
+        else{
+            return;
+        }
+        
+        float remainingYDist = 0;
+        if(Math.abs(yDist-0) < UNIVERSAL_EPSILON_VAL){
+            remainingYDist = 0;
+            yDirectionalMult = 1;
+        }
+        else if(yDist == Math.abs(yDist)){
+            if(this.findGreatestY()+yDist < s.getMaxY()){
+                remainingYDist = yDist;
+                yDirectionalMult = 1;
+            }
+            else if(Math.abs(this.findGreatestY()-s.getMaxY()) < UNIVERSAL_EPSILON_VAL){
+                remainingYDist = 0;
+                yDirectionalMult = 1;
+            }
+            else{
+                remainingYDist = s.getMaxY()-this.findGreatestY();
+                yDirectionalMult = 1;
+            }
+        }
+        else if(yDist != Math.abs(yDist)){
+            if(this.findLeastY()+yDist > s.getMinY()){
+                remainingYDist = yDist;
+                yDirectionalMult = 1;
+            }
+            else if(Math.abs(this.findLeastY()-s.getMinY()) < UNIVERSAL_EPSILON_VAL){
+                remainingYDist = 0;
+                yDirectionalMult = 1;
+            }
+            else{
+                remainingYDist = this.findLeastY()-s.getMinY();
+                yDirectionalMult = -1;
+            }
+        }
+        else{
+            return;
+        }
+        this.translateBox(remainingXDist*xDirectionalMult, remainingYDist*yDirectionalMult);
+    }
+
+    public void translateBox(float xDist, float yDist, Screen subjectScreen) {
+        Coordinates[] trialCoords = {new Coordinates(SW.getX() + xDist, SW.getY() + yDist), new Coordinates(NW.getX() + xDist, NW.getY() + yDist), new Coordinates(SE.getX() + xDist, SE.getY() + yDist), new Coordinates(NE.getX() + xDist, NE.getY() + yDist)};
+        if (subjectScreen.findPointsInsideScreen(trialCoords).length != 4) {
+            this.handleCollisionWithScreenBorder(xDist, yDist, subjectScreen);
+            return;
+        }
+        this.translateBox(xDist, yDist);
+        
+        for(PerfectBox eb : subjectScreen.getAllBoxesInScreenArr()){
+            if(this.equals(eb)){
+                continue;
+            }
+            if(this.hasCollidedWith(eb)){
+                System.out.println("has collided");
+                this.handleCollisionWithBox(eb);
+                eb.handleCollisionWithBox(this);
+            }
+        }
+    }
+
+    public void setHealth(float hp) {
+        health = hp;
+    }
+
+    public void setSpeed(float sped) {
+        speed = sped;
+    }
+
+    public float getHealth() {
+        return health;
+    }
+
+    public float getSpeed() {
+        return speed;
+    }
+}

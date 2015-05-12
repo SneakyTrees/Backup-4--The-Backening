@@ -1,0 +1,36 @@
+package stupiderboxgame;
+
+import java.awt.*;
+import java.awt.event.*;
+import javax.swing.*;  
+
+public class StupiderBoxGame {
+    public static void main(String[] args) {
+        GameWindow gameWindow = new GameWindow(500, 400);
+        GamePanel gamePanel = new GamePanel(new Screen(0, 1000, 0, 1000));
+        gamePanel.getPanelScreen().addPlayerBox(new PlayerBox(75, 75, new Coordinates(500, 500), 500, 150));
+        
+        gameWindow.add(gamePanel);
+        gamePanel.getPanelScreen().addBoxToScreen(new PerfectBox(300, 150, new Coordinates(300, 150)));
+        
+        GameAssembler gameAssembler = new GameAssembler(gamePanel, new EventManager());
+        
+        boolean gameRunning = true;
+        double currentTimeDelta;
+        long currentTime = 0;
+        long previousTime = 0;
+        while(gameRunning){
+            currentTime = System.nanoTime();
+            currentTimeDelta = (currentTime-previousTime)/1000000000.0;
+            
+            //Every time a box is moved, add the moving box and moved box to an array for collision box drawing later
+            
+            //Execute code
+            gameAssembler.getGameEventManager().processEvents(currentTimeDelta);
+            //gamePanel.getPanelScreen().getPlayerBox().printCornersForTesting();
+            
+            previousTime = currentTime;
+            gameWindow.repaint();
+        }
+    }
+}
